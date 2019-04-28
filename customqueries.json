@@ -90,12 +90,12 @@
             ]
         },
 	{
-            "name": "Top Ten Users with Most Sessions",
+            "name": "DA Account Sessions to NON DC",
             "queryList": [
                 {
                     "final": true,
                     "query":
-                        "MATCH (n:User),(m:Computer), (n)<-[r:HasSession]-(m) WHERE NOT n.name STARTS WITH 'ANONYMOUS LOGON' AND NOT n.name='' WITH n, count(r) as rel_count order by rel_count desc LIMIT 10 MATCH p=(m)-[r:HasSession]->(n) RETURN p",
+                        "MATCH (c:Computer)-[:MemberOf]->(t:Group) WHERE NOT t.name = 'DOMAIN CONTROLLERS@TESTLAB.LOCAL' WITH c as NonDC MATCH p=(NonDC)-[:HasSession]->(n:User)-[:MemberOf]-> (g:Group {name:'DOMAIN ADMINS@TESTLAB.LOCAL'}) RETURN p",
                     "allowCollapse": true
                 }
             ]
