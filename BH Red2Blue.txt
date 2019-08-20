@@ -2,6 +2,12 @@
 MATCH p=(m:Group)-[r:AdminTo]->(n:Computer) WHERE m.name STARTS WITH 'DOMAIN USERS' RETURN p
 *****
 
+******* ShortestPath From Domain Users to Domain Admins
+MATCH p=ShortestPath((n {name:"DOMAIN USERS@TESTLAB.LOCAL"})
+-[r*1..]->(m {name: "DOMAIN ADMINS@TESTLAB.LOCAL"})) 
+RETURN p
+*******
+
 ******* Find Shortest Path from DOMAIN USERS to High Value Targets
 MATCH (g:Group),(n {highvalue:true}),p=shortestPath((g)-[*1..]->(n)) 
 WHERE g.name STARTS WITH 'DOMAIN USERS' 
@@ -11,6 +17,7 @@ RETURN p
 ******* Find ALL Path from DOMAIN USERS to High Value Targets
 MATCH (g:Group) WHERE g.name STARTS WITH 'DOMAIN USERS'  MATCH (n {highvalue:true}),p=shortestPath((g)-[r*1..]->(n)) return p
 *****
+
 ***** Find all other right Domain Users shouldn’t have
 MATCH p=(m:Group)-[r:Owns|:WriteDacl|:GenericAll|:WriteOwner|:ExecuteDCOM|:GenericWrite|:AllowedToDelegate|:ForceChangePassword]->(n:Computer) WHERE m.name STARTS WITH 'DOMAIN USERS' RETURN p
 *****
@@ -178,4 +185,3 @@ OPTIONAL MATCH (uT:User)
 WITH COUNT (DISTINCT(uT)) as uTotal, COUNT (DISTINCT(u)) as uHasPath
 RETURN uHasPath / uTotal * 100 as Percent
  **********
-
