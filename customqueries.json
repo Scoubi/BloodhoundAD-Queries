@@ -1,7 +1,54 @@
 {
     "queries": [
-
-	{
+        {
+            "name": "Find all Domain Admins",
+            "queryList": [
+                {
+                    "final": true,
+                    "query": "MATCH p=(n:Group)<-[r:MemberOf*1..]-(m) WHERE n.objectsid =~ {name} RETURN p",
+                    "props": {
+                        "name": "(?i)S-1-5-.*-512"
+                    },
+                    "allowCollapse": false
+                }
+            ]
+        },
+        {
+            "name": "Find Shortest Paths to Domain Admins",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a Domain Admin group...",
+                    "query": "MATCH (n:Group) WHERE n.objectsid =~ {name} RETURN n.name ORDER BY n.name DESC",
+                    "props": {
+                        "name": "(?i)S-1-5-.*-512"
+                    }
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=shortestPath((n)-[r:{}*1..]->(m:Group {name:{result}})) RETURN p",
+                    "allowCollapse": true,
+                    "endNode": "{}"
+                }
+            ]
+        },
+        {
+            "name": "Find Principals with DCSync Rights",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a Domain...",
+                    "query": "MATCH (n:Domain) RETURN n.name ORDER BY n.name DESC"
+                },
+                {
+                    "final": true,
+                    "query": "MATCH (n1)-[:MemberOf|GetChanges*1..]->(u:Domain {name: {result}}) WITH n1,u MATCH (n1)-[:MemberOf|GetChangesAll*1..]->(u) WITH n1,u MATCH p = (n1)-[:MemberOf|GetChanges|GetChangesAll*1..]->(u) RETURN p",
+                    "allowCollapse": true,
+                    "endNode": "{}"
+                }
+            ]
+        },
+        {
             "name": "List Computers where DOMAIN USERS are Local Admin",
             "queryList": [
                 {
@@ -12,7 +59,7 @@
                 }
             ]
         },
-	{
+        {
             "name": "Shortest Path from DOMAIN USERS to High Value Targets",
             "queryList": [
                 {
@@ -23,7 +70,7 @@
                 }
             ]
         },
-	{
+        {
             "name": "ALL Path from DOMAIN USERS to High Value Targets",
             "queryList": [
                 {
@@ -34,7 +81,7 @@
                 }
             ]
         },
-	{
+        {
             "name": "Find Workstations where DOMAIN USERS can RDP To",
             "queryList": [
                 {
@@ -45,7 +92,7 @@
                 }
             ]
         },
-	{
+        {
             "name": "Find Servers where DOMAIN USERS can RDP To",
             "queryList": [
                 {
@@ -56,7 +103,7 @@
                 }
             ]
         },
-	{
+        {
             "name": "Find all other Rights DOMAIN USERS shouldn’t have",
             "queryList": [
                 {
@@ -67,7 +114,79 @@
                 }
             ]
         },
-	{
+        {
+            "name": "Users with Foreign Domain Group Membership",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select source domain...",
+                    "query": "MATCH (n:Domain) RETURN n.name ORDER BY n.name DESC"
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=(n:User)-[:MemberOf]->(m:Group) WHERE n.domain={result} AND m.domain<>n.domain RETURN p",
+                    "startNode": "{}",
+                    "allowCollapse": false
+                }
+            ]
+        },
+        {
+            "name": "Groups with Foreign Domain Group Membership",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select source domain...",
+                    "query": "MATCH (n:Domain) RETURN n.name ORDER BY n.name DESC"
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=(n:Group {domain:{result}})-[:MemberOf]->(m:Group) WHERE m.domain<>n.domain AND n.name<>m.name RETURN p",
+                    "startNode": "{}",
+                    "allowCollapse": false
+                }
+            ]
+        },
+        {
+            "name": "Map Domain Trusts",
+            "queryList": [
+                {
+                    "final": true,
+                    "query": "MATCH p=(n:Domain)-->(m:Domain) RETURN p",
+                    "allowCollapse": true
+                }
+            ]
+        },
+        {
+            "name": "Shortest Paths to Unconstrained Delegation Systems",
+            "queryList": [
+                {
+                    "final": true,
+                    "query": "MATCH (n) MATCH p=shortestPath((n)-[:{}*1..]->(m:Computer {unconstraineddelegation: true})) RETURN p"
+                }
+            ]
+        },
+        {
+            "name": "Shortest Paths from Kerberoastable Users",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a domain...",
+                    "query": "MATCH (n:Domain) RETURN n.name ORDER BY n.name DESC"
+                },
+                {
+                    "final": false,
+                    "title": "Select a user",
+                    "query": "MATCH (n:User) WHERE n.domain={result} AND n.hasspn=true RETURN n.name, n.pwdlastset ORDER BY n.pwdlastset ASC"
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=shortestPath((a:User {name:{result}})-[:{}*1..]->(b:Computer)) RETURN p",
+                    "startNode": "{}",
+                    "allowCollapse": true
+                }
+            ]
+        },
+        {
             "name": "Kerberoastable Accounts member of High Value Group",
             "queryList": [
                 {
@@ -78,7 +197,7 @@
                 }
             ]
         },
-	{
+        {
             "name": "List all Kerberoastable Accounts",
             "queryList": [
                 {
@@ -89,7 +208,82 @@
                 }
             ]
         },
-	{
+        {
+            "name": "Shortest Paths to Domain Admins from Kerberoastable Users",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a Domain Admin group...",
+                    "query": "MATCH (n:Group) WHERE n.objectsid =~ {name} RETURN n.name ORDER BY n.name DESC",
+                    "props": {
+                        "name": "(?i)S-1-5-.*-512"
+                    }
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=shortestPath((n:User {hasspn:true})-[:{}*1..]->(m:Group {name:{result}})) RETURN p",
+                    "allowCollapse": true,
+                    "endNode": "{}"
+                }
+            ]
+        },
+        {
+            "name": "Shortest Path from Owned Principals",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a domain...",
+                    "query": "MATCH (n:Domain) RETURN n.name ORDER BY n.name DESC"
+                },
+                {
+                    "final": false,
+                    "title": "Select a user",
+                    "query": "MATCH (n) WHERE n.domain={result} AND n.owned=true RETURN n.name, n.PwdLastSet ORDER BY n.PwdLastSet ASC"
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=shortestPath((a {name:{result}})-[:{}*1..]->(b:Computer)) RETURN p",
+                    "startNode": "{}",
+                    "allowCollapse": true
+                }
+            ]
+        },
+        {
+            "name": "Shortest Paths to Domain Admins from Owned Principals",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a Domain Admin group...",
+                    "query": "MATCH (n:Group) WHERE n.objectsid =~ {name} RETURN n.name ORDER BY n.name DESC",
+                    "props": {
+                        "name": "(?i)S-1-5-.*-512"
+                    }
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=shortestPath((n {owned:true})-[:{}*1..]->(m:Group {name:{result}})) RETURN p",
+                    "allowCollapse": true,
+                    "endNode": "{}"
+                }
+            ]
+        },
+        {
+            "name": "Shortest Paths to High Value Targets",
+            "queryList": [
+                {
+                    "final": false,
+                    "title": "Select a Domain",
+                    "query": "MATCH (n:Domain) RETURN n.name ORDER BY n.name DESC"
+                },
+                {
+                    "final": true,
+                    "query": "MATCH p=shortestPath((n)-[:{}*1..]->(m {highvalue:true})) WHERE m.domain={result} AND m<>n RETURN p",
+                    "allowCollapse": true,
+                    "endNode": "{}"
+                }
+            ]
+        },
+        {
             "name": "DA Account Sessions to NON DC",
             "queryList": [
                 {
@@ -99,39 +293,6 @@
                     "allowCollapse": true
                 }
             ]
-        },
-        {
-            "name": "Top Ten Computers with Most Admins",
-            "queryList": [
-                {
-                    "final": true,
-                    "query":
-                        "MATCH (n:User),(m:Computer), (n)-[r:AdminTo]->(m) WHERE NOT n.name STARTS WITH 'ANONYMOUS LOGON' AND NOT n.name='' WITH m, count(r) as rel_count order by rel_count desc LIMIT 10 MATCH p=(m)<-[r:AdminTo]-(n) RETURN p",
-                    "allowCollapse": true
-                }
-            ]
-        },        {
-            "name": "Top Ten Computers with Most Sessions",
-            "queryList": [
-                {
-                    "final": true,
-                    "query":
-                        "MATCH (n:User),(m:Computer), (n)<-[r:HasSession]-(m) WHERE NOT n.name STARTS WITH 'ANONYMOUS LOGON' AND NOT n.name='' WITH m, count(r) as rel_count order by rel_count desc LIMIT 10 MATCH p=(m)-[r:HasSession]->(n) RETURN n,r,m",
-                    "allowCollapse": true
-                }
-            ]
-        },
-        {
-            "name": "Top Ten Users with Most Local Admin Rights",
-            "queryList": [
-                {
-                    "final": true,
-                    "query":
-                        "MATCH (n:User),(m:Computer), (n)-[r:AdminTo]->(m) WHERE NOT n.name STARTS WITH 'ANONYMOUS LOGON' AND NOT n.name='' WITH n, count(r) as rel_count order by rel_count desc LIMIT 10 MATCH p=(m)<-[r:AdminTo]-(n) RETURN p",
-                    "allowCollapse": true
-                }
-            ]
         }
-
     ]
 }
