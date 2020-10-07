@@ -1,10 +1,10 @@
 *****  DOMAIN USERS is Admin of Computer 
-MATCH p=(m:Group)-[r:AdminTo]->(n:Computer) WHERE m.name STARTS WITH 'DOMAIN USERS' RETURN p
+MATCH p=(m:Group)-[:AdminTo]->(n:Computer) WHERE m.name STARTS WITH 'DOMAIN USERS' RETURN p
 *****
 
 ******* ShortestPath From Domain Users to Domain Admins
 MATCH p=ShortestPath((n {name:"DOMAIN USERS@TESTLAB.LOCAL"})
--[r*1..]->(m {name: "DOMAIN ADMINS@TESTLAB.LOCAL"})) 
+-[*1..]->(m {name: "DOMAIN ADMINS@TESTLAB.LOCAL"})) 
 RETURN p
 *******
 
@@ -108,7 +108,7 @@ DELETE r
 ********** Shortest Path from Domain Users to Domain Admins
 MATCH (g:Group {name:"DOMAIN USERS@TESTLAB.LOCAL"}),
 (n {name:"DOMAIN ADMINS@TESTLAB.LOCAL"}),
-p=shortestPath((g)-[r*1..]->(n)) 
+p=shortestPath((g)-[*1..]->(n)) 
 return p
 **********
 
