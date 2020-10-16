@@ -58,17 +58,17 @@ MATCH p = (c:Computer)-[:HasSession]->(n)
 return p
 ********
 
-******** DA Sessions to NON DC
-OPTIONAL MATCH (c:Computer)-[:MemberOf]->(t:Group) 
-WHERE NOT t.name = "DOMAIN CONTROLLERS@TESTLAB.LOCAL"
-WITH c as NonDC
-MATCH p=(NonDC)-[:HasSession]->(n:User)-[:MemberOf]->
-(g:Group {name:"DOMAIN ADMINS@TESTLAB.LOCAL"})
-RETURN DISTINCT (n.name) as Username, COUNT(DISTINCT(NonDC)) as Connexions
-ORDER BY COUNT(DISTINCT(NonDC)) DESC
+******** DA Sessions to NON DC - NEW WORKING VERSION
+MATCH (dc:Computer)-[:MemberOf*1..]->(g:Group) 
+WHERE g.name CONTAINS "DOMAIN CONTROLLERS" 
+WITH COLLECT(dc.name) as dcs 
+MATCH (c:Computer) WHERE NOT c.name in dcs 
+MATCH p=(c)-[:HasSession]->(n:User)-[:MemberOf]->(g:Group)  
+WHERE g.name STARTS WITH "DOMAIN ADMINS"  
+RETURN n.name as Username
 ********
 
-******** Count on how many non DC machines DA have sessions
+******** Count on how many non DC machines DA have sessions - Original query by Waldo (Not working afaik) Probably missing a COLLECT after WITH
 MATCH (c:Computer)-[:MemberOf*1..]->(g:Group)
 WHERE g.objectsid ENDS WITH "-516"
 WITH c.name as DomainControllers
