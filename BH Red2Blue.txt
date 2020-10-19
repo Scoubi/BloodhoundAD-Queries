@@ -183,7 +183,7 @@ OPTIONAL MATCH p=shortestPath((u:User)-[*1..]->
 (m:Group {name: "DOMAIN ADMINS@TESTLAB.LOCAL"}))
 OPTIONAL MATCH (uT:User)
 WITH COUNT (DISTINCT(uT)) as uTotal, COUNT (DISTINCT(u)) as uHasPath
-RETURN uHasPath / uTotal * 100 as Percent
+RETURN uHasPath *100 / uTotal as Percent
 **********
 
 ********** Find users WITHOUT a path to DA
