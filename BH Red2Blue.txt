@@ -189,3 +189,12 @@ RETURN uHasPath *100 / uTotal as Percent
 ********** Find users WITHOUT a path to DA
 MATCH (n:User),(m:Group) WHERE NOT EXISTS ((n)-[*]->(m {name:"DOMAIN ADMINS@TESTLAB.LOCAL"})) RETURN n.name
 ********** WARNING - This is extremly long
+
+********** Find High Value Users that are NOT in the Protected User group
+MATCH (prot:User)-[:MemberOf*1..]->(g:Group) 
+WHERE g.name = "PROTECTED USERS@SYNTAX.NET"
+WITH COLLECT(prot) AS protected_user 
+MATCH p = (np:User)-[:MemberOf*1..]->(m:Group)
+WHERE  m.highvalue = True AND NOT np IN protected_user 
+RETURN np
+**********
