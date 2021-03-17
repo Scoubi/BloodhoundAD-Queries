@@ -198,3 +198,7 @@ MATCH p = (np:User)-[:MemberOf*1..]->(m:Group)
 WHERE  m.highvalue = True AND NOT np IN protected_user 
 RETURN np
 **********
+
+********** Find "Easy To Exploit" Path to high value target from Owned 
+MATCH p=shortestpath((s:User {owned: true})-[:MemberOf|AdminTo|Owns|ForceChangePassword*1..]->(t {highvalue: true}))
+RETURN p
