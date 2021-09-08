@@ -22,6 +22,13 @@ MATCH (g:Group) WHERE g.name STARTS WITH 'DOMAIN USERS'  MATCH (n {highvalue:tru
 MATCH p=(m:Group)-[r:Owns|:WriteDacl|:GenericAll|:WriteOwner|:ExecuteDCOM|:GenericWrite|:AllowedToDelegate|:ForceChangePassword]->(n:Computer) WHERE m.name STARTS WITH 'DOMAIN USERS' RETURN p
 *****
 
+***** Domain Controller object ownership. (BHE #1)
+MATCH (g:Group)
+WHERE g.objectid ENDS WITH '-516'
+MATCH p = (n:Base)-[:Owns]->(c:Computer)-[:MemberOf*1..]->(g)
+RETURN p
+*****
+
 ***** Kerberoastable Accounts
 MATCH (n:User)WHERE n.hasspn=true RETURN n
 *****
@@ -29,6 +36,18 @@ MATCH (n:User)WHERE n.hasspn=true RETURN n
 ***** Kerberoastable Accounts member of High Value Group
 MATCH (n:User)-[r:MemberOf]->(g:Group) WHERE g.highvalue=true AND n.hasspn=true RETURN n, g, r
 ******
+
+****** Privileged kerberoastable users (BHE #2)
+MATCH p = shortestPath((u:User {hasspn:true})-[*1..]->(g:Group))
+WHERE g.objectid ENDS WITH '-512'
+RETURN p
+******
+
+***** Domain Users group and other large groups having control of other objects (BHE #3)
+MATCH p = (g:Group)-[{isacl:true}]->(m)
+WHERE g.objectid ENDS WITH '-513'
+RETURN p
+*****
 
 ****** Find WORKSTATIONS where Domain Users can RDP To
 match p=(g:Group)-[:CanRDP]->(c:Computer) where g.name STARTS WITH 'DOMAIN USERS' AND NOT c.operatingsystem CONTAINS 'Server' return p
