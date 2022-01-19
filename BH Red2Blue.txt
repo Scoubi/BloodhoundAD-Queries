@@ -187,7 +187,7 @@ RETURN AVG(LENGTH(filteredPathNodes))
 
 MATCH (u:User)
 MATCH (g:Group {highvalue: True})
-MATCH p = shortestPath((u:User)-[r:AddMember|AdminTo|AllExtendedRights|AllowedToDelegate|CanRDP|Contains|ExecuteDCOM|ForceChangePassword|GenericAll|GenericWrite|GetChangesAll|GpLink|HasSession|MemberOf|Owns|ReadLAPSPassword|TrustedBy|WriteDacl|WriteOwner*1..]->(g))
+MATCH p = shortestPath((u:User)-[*1..]->(g))
 RETURN DISTINCT(u.name),u.enabled
 order by u.name
 
