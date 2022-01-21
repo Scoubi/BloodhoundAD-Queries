@@ -221,3 +221,15 @@ RETURN np
 ********** Find "Easy To Exploit" Path to high value target from Owned 
 MATCH p=shortestpath((s:User {owned: true})-[:MemberOf|AdminTo|Owns|ForceChangePassword|AddMember*1..]->(t {highvalue: true}))
 RETURN p
+
+********** List all Account with the word Admin both on AD and AAD
+match (au:AZUser)
+where au.azname contains "ADMIN"
+match (u:User)
+where u.name contains "ADMIN"
+WITH COLLECT(u.name) + COLLECT(au.azname) as temp
+UNWIND temp as usernames
+return usernames
+
+********** List local accounts that can control AAD Accounts
+match p=shortestpath((:User)-[*1..]->(:AZUser)) return p
