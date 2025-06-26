@@ -97,12 +97,17 @@ RETURN DISTINCT(u.name),COUNT(DISTINCT(c2))
 ORDER BY COUNT(DISTINCT(c2)) DESC
 *********
 
-********* EXCLUDE PATH (Edge) on the fly
-MATCH (n:User),(m:Group {name:"DOMAIN ADMINS@TESTLAB.LOCAL"}),
-p=shortestPath((n)-[r*1..]->(m)) 
+********* EXCLUDE PATH (Edge) on the fly #1
+MATCH p=shortestPath((n)-[r*1..]->(m)) 
 WHERE ALL(x in relationships(p) WHERE type(x) <> "AdminTo") 
 RETURN p
 **********
+
+********* EXCLUDE PATH (Edge) on the fly #2
+MATCH p=(n:User)-[r]->(m:Group)
+WHERE NOT r:MemberOf
+RETURN p
+*********
 
 ********** Set SPN to a User
 MATCH (n:User {name:"JNOA00093@TESTLAB.LOCAL"}) SET n.hasspn=true
